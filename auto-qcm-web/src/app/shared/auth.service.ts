@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { supabase } from './supabase-client';
 import { BehaviorSubject } from 'rxjs';
-import { environment } from '../../environments/environment';
 import { QcmStoreService } from './qcm-store.service';
 
 @Injectable({ providedIn: 'root' })
@@ -42,7 +41,6 @@ export class AuthService {
   }
 
   get userId(): string | null {
-    if (environment.devNoAuth) return environment.devUserId;
     return this._session$.value?.user?.id ?? null;
   }
 }
