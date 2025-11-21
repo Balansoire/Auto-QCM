@@ -1,0 +1,69 @@
+<div class="min-h-screen bg-gray-50 flex justify-center p-4" *ngIf="qcm; else empty">
+  <div class="w-full max-w-3xl bg-white rounded-xl shadow-md flex flex-col">
+    <header class="px-4 pt-4 pb-3 border-b flex items-center justify-between gap-3">
+      <div>
+        <p class="text-xs text-gray-500 uppercase tracking-wide">QCM</p>
+        <h1 class="text-xl sm:text-2xl font-semibold text-gray-900">{{ qcm.name || 'QCM' }}</h1>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button class="text-sm px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50" (click)="exportJson()">Exporter JSON</button>
+        <button class="text-sm px-3 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Sauvegarde...' : 'Sauvegarder' }}
+        </button>
+      </div>
+    </header>
+
+    <div class="px-4 pt-4 pb-20">
+      <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
+        <span>Questions : {{ qcm.items.length }}</span>
+        <span *ngIf="submitted">Score : <strong class="text-gray-900">{{ score }} / {{ qcm.items.length }}</strong></span>
+      </div>
+
+      <div class="space-y-4">
+        <div *ngFor="let item of qcm.items; let i = index" class="border border-gray-200 rounded-lg p-4 bg-white">
+          <div class="flex items-baseline justify-between mb-2">
+            <p class="text-xs font-medium text-blue-600">Question {{ i + 1 }}</p>
+          </div>
+          <div class="font-medium text-gray-900 mb-3">
+            <markdown ngPreserveWhitespaces [data]="item.question"></markdown>
+          </div>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2" *ngFor="let c of item.choices; let j = index">
+              <input type="radio" class="h-4 w-4 text-blue-600" name="q{{i}}" [value]="j" (change)="select(i, j)" />
+              <div class="text-sm text-gray-800">
+                <markdown ngPreserveWhitespaces [data]="c"></markdown>
+              </div>
+            </label>
+          </div>
+          <div *ngIf="submitted" class="mt-3 text-sm">
+            <span [ngClass]="isCorrect(i) ? 'text-green-700' : 'text-red-700'">
+              {{ isCorrect(i) ? 'Correct' : 'Incorrect' }}
+            </span>
+            <div *ngIf="item.explanation" class="mt-1 text-gray-600">
+              <markdown ngPreserveWhitespaces [data]="item.explanation"></markdown>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p *ngIf="error" class="text-sm text-red-600 mt-4">{{ error }}</p>
+    </div>
+
+    <div class="sticky bottom-0 bg-white border-t px-4 py-3 flex items-center justify-between gap-3">
+      <button *ngIf="!submitted" class="flex-1 sm:flex-none bg-green-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-green-700" (click)="submit()">
+        Valider
+      </button>
+      <a class="flex-1 sm:flex-none bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium text-center hover:bg-blue-700" [routerLink]="['/test']">
+        Retour à la génération
+      </a>
+    </div>
+  </div>
+</div>
+<ng-template #empty>
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-md p-6 text-center">
+      <p class="text-gray-700 mb-3">Aucun QCM chargé. Retournez à la page "Test automatique".</p>
+      <a class="text-blue-600 font-medium hover:underline" [routerLink]="['/test']">Aller au formulaire</a>
+    </div>
+  </div>
+</ng-template>

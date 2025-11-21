@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: auto-qcm-api
+    rootDir: api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    autoDeploy: true
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: https://auto-qcm.netlify.app,http://localhost:4200
+      # Set these in the Render dashboard with real secrets
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false

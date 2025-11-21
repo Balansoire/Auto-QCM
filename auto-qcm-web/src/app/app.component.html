@@ -1,0 +1,45 @@
+<div class="min-h-screen bg-gray-50 flex flex-col">
+  <header class="bg-white shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a routerLink="/test" class="text-base sm:text-lg font-semibold text-gray-900">Auto QCM</a>
+        <nav class="hidden sm:flex gap-2">
+          <a routerLink="/test" routerLinkActive="bg-blue-50 text-blue-700" class="px-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-700">Nouveau QCM</a>
+          <a routerLink="/history" routerLinkActive="bg-blue-50 text-blue-700" class="px-3 py-1.5 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-700">Historique</a>
+        </nav>
+      </div>
+
+      <div *ngIf="(session$ | async) as session; else guest" class="flex items-center gap-3">
+        <button class="hidden sm:inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50" (click)="logout()">
+          Déconnexion
+        </button>
+        <button class="flex items-center gap-2" routerLink="/profile">
+          <div class="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
+            {{ getInitials(session) }}
+          </div>
+          <span class="hidden sm:block text-sm text-gray-800">
+            {{ getDisplayName(session) }}
+          </span>
+        </button>
+      </div>
+
+      <ng-template #guest>
+        <div class="flex items-center gap-2">
+          <a routerLink="/login" class="px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium text-blue-600 border border-blue-100 hover:bg-blue-50">Connexion</a>
+          <a routerLink="/signup" class="hidden sm:inline-flex px-3 py-1.5 rounded-md text-xs sm:text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">Inscription</a>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="sm:hidden border-t border-gray-200">
+      <nav class="flex">
+        <a routerLink="/test" routerLinkActive="bg-blue-50 text-blue-700" class="flex-1 px-3 py-2 text-center text-xs font-medium text-gray-700 hover:bg-gray-50">Nouveau QCM</a>
+        <a routerLink="/history" routerLinkActive="bg-blue-50 text-blue-700" class="flex-1 px-3 py-2 text-center text-xs font-medium text-gray-700 hover:bg-gray-50">Historique</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <router-outlet></router-outlet>
+  </main>
+</div>

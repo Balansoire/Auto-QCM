@@ -1,0 +1,22 @@
+<div class="min-h-screen bg-gray-50 flex justify-center p-4">
+  <div class="w-full max-w-3xl bg-white rounded-xl shadow-md p-6">
+    <h1 class="text-xl sm:text-2xl font-semibold mb-4 text-gray-900">Historique</h1>
+    <div *ngIf="justSaved" class="mb-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+      QCM sauvegardé avec succès.
+    </div>
+    <div *ngIf="loading" class="text-sm text-gray-600 mb-2">Chargement...</div>
+    <div *ngIf="error" class="text-sm text-red-600 mb-2">{{ error }}</div>
+    <ul class="divide-y divide-gray-200">
+      <li *ngFor="let item of items" class="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <div class="font-medium text-gray-900">{{ item.name || 'QCM' }}</div>
+          <div class="text-sm text-gray-600">{{ item.created_at | date: 'short' }} · Score : {{ item.score ?? '-' }}</div>
+        </div>
+        <div class="flex gap-2 justify-end">
+          <button class="px-3 py-1 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50" (click)="open(item.id)">Ouvrir</button>
+          <button class="px-3 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700" (click)="remove(item.id)">Supprimer</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

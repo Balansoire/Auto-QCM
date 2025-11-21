@@ -1,0 +1,32 @@
+/* You can add global styles to this file, and also import other style files */
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #F3F4F6; /* gris très clair */
+  color: #111827; /* texte gris très foncé */
+}
+
+/* Styles globaux pour le code rendu par ngx-markdown */
+markdown code {
+  background-color: #F3F4F6; /* fond gris clair pour le code inline */
+  padding: 0.1rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+markdown pre {
+  background-color: #E5E7EB; /* gris un peu plus soutenu pour les blocs de code */
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  max-width: 100%;
+  white-space: pre-wrap;      /* conserve les sauts de ligne mais permet le retour à la ligne */
+  overflow-wrap: break-word;  /* coupe les mots très longs si nécessaire */
+}
+
+markdown pre code {
+  background-color: transparent; /* le fond est géré par <pre> */
+  padding: 0;
+}
