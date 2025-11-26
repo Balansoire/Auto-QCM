@@ -3,10 +3,10 @@
     <h1 class="text-xl sm:text-2xl font-semibold mb-4 text-gray-900">Profil</h1>
     <ng-container *ngIf="(session$ | async) as session; else noSession">
       <p class="text-sm text-gray-700 mb-2">
-        <span class="font-medium">Email :</span> {{ session.user?.email }}
+        <span class="font-medium">Email :</span> {{ session.user.email }}
       </p>
       <p class="text-xs text-gray-500 break-all">
-        <span class="font-medium">ID utilisateur :</span> {{ session.user?.id }}
+        <span class="font-medium">ID utilisateur :</span> {{ session.user.id }}
       </p>
       <div class="mt-4 border-t pt-4">
         <h2 class="text-sm font-semibold mb-2 text-gray-900">Utilisation des QCM</h2>
