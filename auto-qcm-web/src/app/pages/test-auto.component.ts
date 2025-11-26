@@ -36,6 +36,7 @@ export class TestAutoPageComponent {
       error: err => {
         this.loading = false;
         this.error = 'Erreur de génération';
+        this.qcmStore.setCurrent(null);
         console.error(err);
       }
     });

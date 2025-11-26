@@ -51,6 +51,14 @@ DEV_MODE = os.getenv("DEV_MODE", "false").lower() in ("1", "true", "yes")
 DEV_USER_ID = os.getenv("DEV_USER_ID", "00000000-0000-0000-0000-000000000001")
 # In-memory fallback store for dev/testing when Supabase is not configured
 STORE: Dict[str, Dict[str, Any]] = {}
+ROLE_LIMITS = {
+    "user": 10,
+    "user_plus": 100,
+    "forbidden": 0,
+    "admin": None,
+    "dev": None,
+}
+DEFAULT_ROLE = "user"
 
 app = FastAPI(title="Auto QCM API", version="0.1.0")
 app.add_middleware(
@@ -134,6 +142,31 @@ def _supabase_client() -> Optional["Client"]:
         if DEV_MODE:
             print("[AutoQCM][DEBUG] Failed to create Supabase client:", repr(e))
         return None
+
+
+def _get_user_role(supa: "Client", user_id: str) -> str:
+    res = supa.table("user_roles").select("role").eq("user_id", user_id).limit(1).execute()
+    rows = getattr(res, "data", None) or []
+    if rows:
+        role = rows[0].get("role") or DEFAULT_ROLE
+        return str(role)
+    return DEFAULT_ROLE
+
+
+def _get_usage(supa: "Client", user_id: str):
+    res = supa.table("qcm_usage").select("model,generated_count").eq("user_id", user_id).execute()
+    rows = getattr(res, "data", None) or []
+    per_model = []
+    total = 0
+    for it in rows:
+        model = it.get("model")
+        count = it.get("generated_count") or 0
+        if model is None:
+            continue
+        count_int = int(count)
+        per_model.append({"model": model, "count": count_int})
+        total += count_int
+    return per_model, total
 
 
 def _ensure_gemini():
@@ -261,16 +294,50 @@ async def generate_qcm(req: GenerateRequest, user_id: str = Depends(_verify_and_
     skills = req.skills or []
     count = max(1, min(50, req.count or 10))
     difficulty = (req.difficulty or "entretien").strip() or "entretien"
+    supa = _supabase_client()
+    role = DEFAULT_ROLE
+    limit = ROLE_LIMITS.get(role)
+    total_before = 0
+    if supa:
+        try:
+            role = _get_user_role(supa, user_id)
+            if role not in ROLE_LIMITS:
+                raise HTTPException(status_code=403, detail="Rôle utilisateur inconnu, génération de QCM interdite.")
+            limit = ROLE_LIMITS.get(role)
+            _, total_before = _get_usage(supa, user_id)
+        except Exception as e:
+            if DEV_MODE:
+                print("[AutoQCM][DEBUG] Failed to compute quota:", repr(e))
+            raise HTTPException(status_code=500, detail="Configuration des quotas QCM invalide. Contactez l'administrateur.")
+    if supa and limit is not None and total_before >= int(limit):
+        raise HTTPException(status_code=403, detail="Limite de génération de QCM atteinte pour votre rôle.")
 
-    # Try LangChain Gemini, fallback to default content on error
+    model_name = GEMINI_MODEL
     try:
         if not ChatGoogleGenerativeAI:
             raise RuntimeError("LangChain Google GenAI provider not available")
-        return _generate_via_langchain(skills, count, req.name, difficulty)
+        response = _generate_via_langchain(skills, count, req.name, difficulty)
+        model_name = GEMINI_MODEL
     except Exception as e:
         if DEV_MODE:
             print("[AutoQCM][DEBUG] Gemini generation failed, using fallback:", repr(e))
-        return _generate_fallback(skills, count, req.name, difficulty)
+        response = _generate_fallback(skills, count, req.name, difficulty)
+        model_name = "fallback"
+
+    if supa:
+        try:
+            res = supa.table("qcm_usage").select("generated_count").eq("user_id", user_id).eq("model", model_name).limit(1).execute()
+            rows = getattr(res, "data", None) or []
+            if rows:
+                current = (rows[0].get("generated_count") or 0) + 1
+                supa.table("qcm_usage").update({"generated_count": int(current)}).eq("user_id", user_id).eq("model", model_name).execute()
+            else:
+                supa.table("qcm_usage").insert({"user_id": user_id, "model": model_name, "generated_count": 1}).execute()
+        except Exception as e:
+            if DEV_MODE:
+                print("[AutoQCM][DEBUG] Failed to update usage:", repr(e))
+
+    return response
 
 
 @app.post("/save_qcm")
@@ -340,6 +407,22 @@ async def history(user_id: str, _current: str = Depends(_verify_and_get_user_id)
             id=it["id"], user_id=it["user_id"], name=it.get("name"), score=it.get("score"), created_at=datetime.fromisoformat(it["created_at"])  # type: ignore
         ) for it in items
     ]
+
+
+@app.get("/usage_stats")
+async def usage_stats(current_user_id: str = Depends(_verify_and_get_user_id)):
+    supa = _supabase_client()
+    if not supa:
+        return {"role": "dev", "limit": None, "total": 0, "per_model": []}
+    try:
+        role = _get_user_role(supa, current_user_id)
+        limit = ROLE_LIMITS.get(role, ROLE_LIMITS.get(DEFAULT_ROLE))
+        per_model, total = _get_usage(supa, current_user_id)
+        return {"role": role, "limit": limit, "total": total, "per_model": per_model}
+    except Exception as e:
+        if DEV_MODE:
+            print("[AutoQCM][DEBUG] Failed to retrieve usage stats:", repr(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/qcm/{qid}")

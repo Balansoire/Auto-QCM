@@ -29,4 +29,13 @@ export class ApiService {
   deleteQcm(id: string) {
     return this.http.delete<void>(`${this.base}/qcm/${id}`);
   }
+
+  getUsageStats() {
+    return this.http.get<{
+      role: string;
+      limit: number | null;
+      total: number;
+      per_model: { model: string; count: number }[];
+    }>(`${this.base}/usage_stats`);
+  }
 }

@@ -8,6 +8,41 @@
       <p class="text-xs text-gray-500 break-all">
         <span class="font-medium">ID utilisateur :</span> {{ session.user?.id }}
       </p>
+      <div class="mt-4 border-t pt-4">
+        <h2 class="text-sm font-semibold mb-2 text-gray-900">Utilisation des QCM</h2>
+        <ng-container *ngIf="(usage$ | async) as usage">
+          <p class="text-xs text-gray-600 mb-1" *ngIf="usage">
+            <span class="font-medium">Rôle :</span>
+            <span class="ml-1">{{ usage.role }}</span>
+          </p>
+          <p class="text-xs text-gray-600 mb-2" *ngIf="usage">
+            <span class="font-medium">Limite :</span>
+            <span class="ml-1">
+              {{ usage.limit === null ? 'Illimitée' : (usage.limit + ' QCM') }}
+            </span>
+          </p>
+
+          <ng-container *ngIf="usage?.per_model?.length; else noUsage">
+            <ul class="text-xs text-gray-700 mb-2 space-y-1">
+              <li *ngFor="let item of usage.per_model">
+                <span class="font-medium">{{ item.model }}</span>
+                : {{ item.count }} QCM générés
+              </li>
+            </ul>
+
+            <p class="text-xs text-gray-700" *ngIf="usage.per_model.length > 1">
+              <span class="font-medium">Total généré :</span>
+              <span class="ml-1">{{ usage.total }}</span> QCM
+            </p>
+          </ng-container>
+
+          <ng-template #noUsage>
+            <p class="text-xs text-gray-500">
+              Aucun QCM généré pour l'instant.
+            </p>
+          </ng-template>
+        </ng-container>
+      </div>
     </ng-container>
     <ng-template #noSession>
       <p class="text-sm text-gray-700 mb-4">

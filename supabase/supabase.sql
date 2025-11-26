@@ -14,6 +14,20 @@ create table if not exists public.qcm_tests (
   created_at timestamptz not null default now()
 );
 
+-- Table: user_roles
+create table if not exists public.user_roles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  role text not null default 'user'
+);
+
+-- Table: qcm_usage
+create table if not exists public.qcm_usage (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  model text not null,
+  generated_count integer not null default 0,
+  primary key (user_id, model)
+);
+
 -- Indexes
 create index if not exists idx_qcm_tests_user_created on public.qcm_tests(user_id, created_at desc);
 
