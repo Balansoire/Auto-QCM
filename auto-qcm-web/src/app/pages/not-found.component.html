@@ -1,0 +1,21 @@
+<div class="flex justify-center p-4">
+  <div class="w-full max-w-2xl bg-white rounded-xl shadow-md p-8 text-center">
+    <p class="text-sm font-semibold text-blue-600 mb-2">Erreur 404</p>
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Page introuvable</h1>
+    <p class="text-sm text-gray-600 mb-6">
+      Le lien que vous avez suivi semble incorrect ou la page a &eacute;t&eacute; d&eacute;plac&eacute;e.
+    </p>
+    <div *ngIf="session$ | async; else guest" class="flex flex-col sm:flex-row">
+      <a routerLink="/test" class="inline-flex justify-center items-center px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700">
+        Retour au g&eacute;n&eacute;rateur de QCM
+      </a>
+    </div>
+    <ng-template #guest>
+      <div class="flex flex-col sm:flex-row">
+        <a routerLink="/login" class="inline-flex justify-center items-center px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700">
+          Aller &agrave; la page de connexion
+        </a>
+      </div>
+    </ng-template>
+  </div>
+</div>

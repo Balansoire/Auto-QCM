@@ -5,6 +5,7 @@ import { TestAutoPageComponent } from './pages/test-auto.component';
 import { QcmPageComponent } from './pages/qcm.component';
 import { HistoryPageComponent } from './pages/history.component';
 import { ProfilePageComponent } from './pages/profile.component';
+import { NotFoundPageComponent } from './pages/not-found.component';
 import { authGuard } from './shared/auth.guard';
 
 export const routes: Routes = [
@@ -15,5 +16,6 @@ export const routes: Routes = [
   { path: 'qcm', component: QcmPageComponent, canActivate: [authGuard] },
   { path: 'history', component: HistoryPageComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfilePageComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: 'test' }
+  { path: '**', component: NotFoundPageComponent }
 ];
+
