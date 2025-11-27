@@ -87,4 +87,26 @@ describe('QcmPageComponent (logic)', () => {
     expect(comp.saving).toBeFalse();
     expect(comp.error).toBeNull();
   });
+
+  it('should generate export filename following convention (F-QCM-005)', () => {
+    const qcm = makeQcm();
+    comp.qcm = qcm;
+
+    const fakeLink: any = {
+      click: jasmine.createSpy('click'),
+      href: '',
+      download: '',
+    };
+
+    spyOn(document as any, 'createElement').and.returnValue(fakeLink);
+    spyOn(URL as any, 'createObjectURL').and.returnValue('blob:mock');
+    spyOn(URL as any, 'revokeObjectURL');
+
+    spyOn(Date.prototype as any, 'toISOString').and.returnValue('2025-01-02T12:34:56.000Z');
+
+    comp.exportJson();
+
+    expect(fakeLink.download).toBe('qcm-test-qcm-2025-01-02.json');
+    expect(fakeLink.click).toHaveBeenCalled();
+  });
 });

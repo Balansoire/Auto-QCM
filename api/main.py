@@ -7,7 +7,11 @@ from typing import List, Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except Exception:
+    def load_dotenv(*args, **kwargs):
+        return False
 from pathlib import Path
 
 # Optional imports (may not be available locally until Python >=3.10 and deps are installed)
@@ -107,18 +111,24 @@ class HistoryItem(BaseModel):
 
 
 # ---------- Utilities ----------
-class RetryLoggingHandler(BaseCallbackHandler):  # type: ignore
-    """Callback LangChain pour loguer chaque retry LLM."""
+if BaseCallbackHandler:
+    class RetryLoggingHandler(BaseCallbackHandler):  # type: ignore
+        """Callback LangChain pour loguer chaque retry LLM."""
 
-    def on_retry(self, retry_state, **kwargs):  # type: ignore[override]
-        exc = None
-        if getattr(retry_state, "outcome", None) is not None:
-            try:
-                exc = retry_state.outcome.exception()
-            except Exception:  # pragma: no cover
-                exc = retry_state.outcome
-        attempt = getattr(retry_state, "attempt_number", None)
-        print("[AutoQCM][DEBUG] LLM retry attempt", attempt, "exception:", repr(exc))
+        def on_retry(self, retry_state, **kwargs):  # type: ignore[override]
+            exc = None
+            if getattr(retry_state, "outcome", None) is not None:
+                try:
+                    exc = retry_state.outcome.exception()
+                except Exception:  # pragma: no cover
+                    exc = retry_state.outcome
+            attempt = getattr(retry_state, "attempt_number", None)
+            print("[AutoQCM][DEBUG] LLM retry attempt", attempt, "exception:", repr(exc))
+else:
+    class RetryLoggingHandler:  # type: ignore
+        def __init__(self, *args, **kwargs):
+            pass
+
 
 def _supabase_client() -> Optional["Client"]:
     global SUPABASE_CLIENT
@@ -267,6 +277,18 @@ def _generate_fallback(skills: List[str], count: int, name: Optional[str], diffi
     return GenerateResponse(name=name, items=items)
 
 
+def _qcm_to_json_dict(qcm: GenerateResponse) -> dict:
+    """Convertit un modèle GenerateResponse en dict JSON, compatible Pydantic v1/v2."""
+    # Pydantic v2
+    if hasattr(qcm, "model_dump"):
+        return qcm.model_dump()  # type: ignore[no-any-return]
+    # Pydantic v1 (ou compat)
+    if hasattr(qcm, "dict"):
+        return qcm.dict()  # type: ignore[no-any-return]
+    # Fallback très défensif
+    return json.loads(qcm.json())  # type: ignore[no-any-return]
+
+
 async def _verify_and_get_user_id(authorization: Optional[str] = Header(default=None)) -> str:
     if authorization and authorization.lower().startswith("bearer "):
         token = authorization.split(" ", 1)[1]
@@ -305,6 +327,9 @@ async def generate_qcm(req: GenerateRequest, user_id: str = Depends(_verify_and_
                 raise HTTPException(status_code=403, detail="Rôle utilisateur inconnu, génération de QCM interdite.")
             limit = ROLE_LIMITS.get(role)
             _, total_before = _get_usage(supa, user_id)
+        except HTTPException:
+            # Propager directement les erreurs HTTP explicites (ex: rôle inconnu)
+            raise
         except Exception as e:
             if DEV_MODE:
                 print("[AutoQCM][DEBUG] Failed to compute quota:", repr(e))
@@ -355,7 +380,7 @@ async def save_qcm(req: SaveRequest, user_id: str = Depends(_verify_and_get_user
                 "id": record_id,
                 "user_id": req.user_id,
                 "name": req.qcm.name,
-                "qcm": json.loads(req.qcm.model_dump_json()),
+                "qcm": _qcm_to_json_dict(req.qcm),
                 "score": req.score,
                 "created_at": now,
             }
@@ -378,7 +403,7 @@ async def save_qcm(req: SaveRequest, user_id: str = Depends(_verify_and_get_user
         "id": record_id,
         "user_id": req.user_id,
         "name": req.qcm.name,
-        "qcm": json.loads(req.qcm.model_dump_json()),
+        "qcm": _qcm_to_json_dict(req.qcm),
         "score": req.score,
         "created_at": now,
     }
