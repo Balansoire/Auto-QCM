@@ -97,3 +97,21 @@ Headers: `Authorization: Bearer <JWT Supabase>` (en dev, optionnel si DEV_MODE=t
 ## Divers
 - CORS: `http://localhost:4200` et `https://auto-qcm.netlify.app` autorisés par défaut (configurable via `ALLOWED_ORIGINS`)
 - Docs Swagger: `/docs`
+
+## Tests
+
+### Tests frontend (Angular)
+- Lancer tous les tests unitaires / d'intégration :
+  - `cd auto-qcm-web`
+  - `npm test` (mode interactif)
+  - ou `npm test -- --watch=false --browsers=ChromeHeadless` (comme en CI)
+
+### Tests backend (FastAPI)
+- Dans `api/` avec l'environnement virtuel activé :
+  - `pytest`
+
+### Intégration continue (GitHub Actions)
+- Un workflow `.github/workflows/tests.yml` exécute automatiquement :
+  - les tests frontend (`npm test -- --watch=false --browsers=ChromeHeadless`) dans `auto-qcm-web/`
+  - les tests backend (`pytest`) dans `api/`
+- Le workflow se lance à chaque `push` et `pull_request` sur ce dépôt GitHub.
