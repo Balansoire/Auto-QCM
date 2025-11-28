@@ -39,28 +39,36 @@ def test_root_ok(client: TestClient) -> None:
     assert data["name"] == "Auto QCM API"
 
 
-def test_generate_qcm_fallback(client: TestClient) -> None:
+def test_generate_qcm_error_details_when_unavailable(client: TestClient) -> None:
+    """B-API-002: /generate_qcm doit renvoyer une erreur HTTP avec un detail explicite quand la génération échoue.
+
+    Dans ce test, Gemini/LangChain sont désactivés (ChatGoogleGenerativeAI=None, pas de GEMINI_API_KEY),
+    ce qui doit conduire à une erreur de service plutôt qu'à un QCM de fallback.
+    """
+
     payload = {"skills": ["python"], "count": 3, "name": "Test QCM"}
-    # En DEV, l'auth est simulée si DEV_MODE=true
     resp = client.post("/generate_qcm", json=payload)
-    assert resp.status_code == 200
+
+    assert resp.status_code in (500, 503)
     data = resp.json()
-
-    assert data["name"] == "Test QCM"
-    assert "items" in data and isinstance(data["items"], list)
-    assert len(data["items"]) == 3
-
-    first = data["items"][0]
-    assert "question" in first
-    assert isinstance(first.get("choices"), list) and len(first["choices"]) == 4
-    assert 0 <= first["answer_index"] <= 3
+    assert "detail" in data
+    # Le message doit indiquer que le service de génération est indisponible ou en erreur
+    assert "erreur" in data["detail"].lower() or "indisponible" in data["detail"].lower()
 
 
 def test_save_and_history_in_memory_store(client: TestClient) -> None:
-    # D'abord générer un petit QCM
-    gen_resp = client.post("/generate_qcm", json={"skills": ["python"], "count": 1, "name": "History test"})
-    assert gen_resp.status_code == 200
-    qcm = gen_resp.json()
+    # Construire un petit QCM factice sans dépendre de /generate_qcm
+    qcm = {
+        "name": "History test",
+        "items": [
+            {
+                "id": "1",
+                "question": "Q1",
+                "choices": ["A", "B", "C", "D"],
+                "answer_index": 0,
+            }
+        ],
+    }
 
     user_id = "test-user-123"
     save_payload = {"user_id": user_id, "qcm": qcm, "score": 1}
@@ -80,10 +88,18 @@ def test_save_and_history_in_memory_store(client: TestClient) -> None:
 
 
 def test_get_and_delete_qcm_from_store(client: TestClient) -> None:
-    # Créer et sauvegarder un QCM
-    gen_resp = client.post("/generate_qcm", json={"skills": ["python"], "count": 1, "name": "Delete test"})
-    assert gen_resp.status_code == 200
-    qcm = gen_resp.json()
+    # Créer et sauvegarder un QCM factice sans dépendre de /generate_qcm
+    qcm = {
+        "name": "Delete test",
+        "items": [
+            {
+                "id": "1",
+                "question": "Q1",
+                "choices": ["A", "B", "C", "D"],
+                "answer_index": 0,
+            }
+        ],
+    }
 
     user_id = "test-user-456"
     save_resp = client.post("/save_qcm", json={"user_id": user_id, "qcm": qcm, "score": 1})

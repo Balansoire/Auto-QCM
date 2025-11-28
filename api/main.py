@@ -345,9 +345,9 @@ async def generate_qcm(req: GenerateRequest, user_id: str = Depends(_verify_and_
         model_name = GEMINI_MODEL
     except Exception as e:
         if DEV_MODE:
-            print("[AutoQCM][DEBUG] Gemini generation failed, using fallback:", repr(e))
-        response = _generate_fallback(skills, count, req.name, difficulty)
-        model_name = "fallback"
+            print("[AutoQCM][DEBUG] Gemini generation failed:", repr(e))
+        # Plus de QCM fallback : on renvoie une erreur explicite au client
+        raise HTTPException(status_code=503, detail="Service de génération de QCM indisponible ou en erreur. Veuillez réessayer plus tard.")
 
     if supa:
         try:

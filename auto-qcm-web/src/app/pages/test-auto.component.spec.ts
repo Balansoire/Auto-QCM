@@ -97,4 +97,42 @@ describe('TestAutoPageComponent (logic)', () => {
     expect(comp.error).toBe('Erreur de génération');
     expect(store.setCurrent).toHaveBeenCalledWith(null);
   });
+
+  it('displays backend detail on HTTP error with detail (F-TESTAUTO-005)', () => {
+    const backendDetail = 'Limite de génération de QCM atteinte pour votre rôle.';
+
+    api.generateQcm.and.returnValue({
+      subscribe: (observer: any) => {
+        observer.error({ status: 403, error: { detail: backendDetail } });
+      },
+    } as any);
+
+    comp.skillsInput = 'python';
+    comp.count = 3;
+
+    comp.onGenerate();
+
+    expect(comp.loading).toBeFalse();
+    expect(comp.error).toBe(backendDetail);
+    expect(store.setCurrent).toHaveBeenCalledWith(null);
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+  });
+
+  it('displays generic error when no detail is provided (F-TESTAUTO-006)', () => {
+    api.generateQcm.and.returnValue({
+      subscribe: (observer: any) => {
+        observer.error({ status: 500, error: {} });
+      },
+    } as any);
+
+    comp.skillsInput = 'python';
+    comp.count = 3;
+
+    comp.onGenerate();
+
+    expect(comp.loading).toBeFalse();
+    expect(comp.error).toBe('Erreur de génération, veuillez réessayer plus tard.');
+    expect(store.setCurrent).toHaveBeenCalledWith(null);
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+  });
 });

@@ -1,0 +1,82 @@
+id,layer,area,target,test_name,description,file,type,priority,status
+F-APP-001,front,component,AppComponent,display_name_from_email,"getDisplayName() retourne la partie avant @ de l'email quand elle est présente.",auto-qcm-web/src/app/app.component.spec.ts,unit,high,done
+F-APP-002,front,component,AppComponent,display_name_default,"getDisplayName() renvoie 'Compte' quand l'email est manquant ou vide.",auto-qcm-web/src/app/app.component.spec.ts,unit,high,done
+F-APP-003,front,component,AppComponent,initials_two_letters,"getInitials() renvoie 2 lettres dérivées du display name.",auto-qcm-web/src/app/app.component.spec.ts,unit,medium,done
+F-APP-004,front,component,AppComponent,logout_navigates_login,"logout() appelle auth.signOut() puis navigateByUrl('/login').",auto-qcm-web/src/app/app.component.spec.ts,unit,high,done
+
+F-AUTH-001,front,service,AuthService,bootstrap_sets_session,"bootstrap() lit la session Supabase et alimente le BehaviorSubject.",auto-qcm-web/src/app/shared/auth.service.spec.ts,unit,medium,done
+F-AUTH-002,front,service,AuthService,signin_success,"signIn() transmet email/mot de passe à supabase.auth.signInWithPassword.",auto-qcm-web/src/app/shared/auth.service.spec.ts,unit,high,done
+F-AUTH-003,front,service,AuthService,signup_success,"signUp() transmet email/mot de passe à supabase.auth.signUp.",auto-qcm-web/src/app/shared/auth.service.spec.ts,unit,medium,done
+F-AUTH-004,front,service,AuthService,signout_clears_qcm,"signOut() appelle supabase.auth.signOut et QcmStoreService.setCurrent(null).",auto-qcm-web/src/app/shared/auth.service.spec.ts,unit,medium,done
+F-AUTH-005,front,service,AuthService,get_access_token,"getAccessToken() retourne le token d'accès ou null.",auto-qcm-web/src/app/shared/auth.service.spec.ts,unit,low,done
+F-AUTH-006,front,service,AuthService,user_id_getter,"userId expose l'identifiant utilisateur courant ou null.",auto-qcm-web/src/app/shared/auth.service.spec.ts,unit,low,done
+
+F-GUARD-001,front,guard,authGuard,allow_with_session,"authGuard laisse passer la navigation quand Supabase renvoie une session.",auto-qcm-web/src/app/shared/auth.guard.spec.ts,unit,high,done
+F-GUARD-002,front,guard,authGuard,redirect_without_session,"authGuard redirige vers /login quand la session est absente ou en erreur.",auto-qcm-web/src/app/shared/auth.guard.spec.ts,unit,high,done
+
+F-API-001,front,service,ApiService,generate_qcm_post_body,"generateQcm() fait un POST /generate_qcm avec le body attendu.",auto-qcm-web/src/app/shared/api.service.spec.ts,unit,high,done
+F-API-002,front,service,ApiService,save_qcm_post_body,"saveQcm() fait un POST /save_qcm avec user_id/qcm/score.",auto-qcm-web/src/app/shared/api.service.spec.ts,unit,high,done
+F-API-003,front,service,ApiService,get_history_get,"getHistory() interroge GET /history/{user_id}.",auto-qcm-web/src/app/shared/api.service.spec.ts,unit,medium,done
+F-API-004,front,service,ApiService,get_qcm_get,"getQcm() interroge GET /qcm/{id} et retourne l'objet attendu.",auto-qcm-web/src/app/shared/api.service.spec.ts,unit,medium,done
+F-API-005,front,service,ApiService,delete_qcm_delete,"deleteQcm() envoie DELETE /qcm/{id}.",auto-qcm-web/src/app/shared/api.service.spec.ts,unit,medium,done
+F-API-006,front,service,ApiService,get_usage_stats_get,"getUsageStats() interroge GET /usage_stats et mappe la réponse.",auto-qcm-web/src/app/shared/api.service.spec.ts,unit,medium,done
+
+F-QCMSTORE-001,front,service,QcmStoreService,set_and_get_current,"setCurrent() stocke le QCM et getCurrent() le retourne.",auto-qcm-web/src/app/shared/qcm-store.service.spec.ts,unit,medium,done
+F-QCMSTORE-002,front,service,QcmStoreService,clear_current,"setCurrent(null) remet le store à null.",auto-qcm-web/src/app/shared/qcm-store.service.spec.ts,unit,low,done
+
+F-LOGIN-001,front,component,LoginPageComponent,submit_success_redirect,"onSubmit() appelle AuthService.signIn et redirige vers /test si succès.",auto-qcm-web/src/app/pages/login.component.spec.ts,unit,high,done
+F-LOGIN-002,front,component,LoginPageComponent,submit_error_sets_message,"onSubmit() affiche le message d'erreur quand AuthService.signIn échoue.",auto-qcm-web/src/app/pages/login.component.spec.ts,unit,high,done
+F-LOGIN-003,front,component,LoginPageComponent,loading_flag,"loading passe à true pendant l'appel puis à false après.",auto-qcm-web/src/app/pages/login.component.spec.ts,unit,medium,done
+
+F-SIGNUP-001,front,component,SignupPageComponent,submit_success_redirect,"onSubmit() appelle AuthService.signUp et redirige vers /test si succès.",auto-qcm-web/src/app/pages/signup.component.spec.ts,unit,high,done
+F-SIGNUP-002,front,component,SignupPageComponent,submit_error_sets_message,"onSubmit() affiche le message d'erreur quand AuthService.signUp échoue.",auto-qcm-web/src/app/pages/signup.component.spec.ts,unit,high,done
+F-SIGNUP-003,front,component,SignupPageComponent,loading_flag,"loading passe à true pendant l'appel puis à false après.",auto-qcm-web/src/app/pages/signup.component.spec.ts,unit,medium,done
+
+F-TESTAUTO-001,front,component,TestAutoPageComponent,skills_parsing,"onGenerate() découpe correctement skillsInput en tableau nettoyé.",auto-qcm-web/src/app/pages/test-auto.component.spec.ts,unit,medium,done
+F-TESTAUTO-002,front,component,TestAutoPageComponent,count_clamping,"count est borné entre 1 et 50.",auto-qcm-web/src/app/pages/test-auto.component.spec.ts,unit,medium,done
+F-TESTAUTO-003,front,component,TestAutoPageComponent,generate_success_navigate,"succès /generate_qcm : setCurrent(qcm) puis navigation vers /qcm.",auto-qcm-web/src/app/pages/test-auto.component.spec.ts,unit,high,done
+F-TESTAUTO-004,front,component,TestAutoPageComponent,generate_error_clears_store,"erreur /generate_qcm : error message + setCurrent(null).",auto-qcm-web/src/app/pages/test-auto.component.spec.ts,unit,high,done
+
+F-TESTAUTO-005,front,component,TestAutoPageComponent,display_backend_detail,"en cas d'erreur HTTP avec un champ detail côté backend, on affiche ce message à l'utilisateur sans naviguer vers /qcm et sans conserver de QCM.",auto-qcm-web/src/app/pages/test-auto.component.spec.ts,unit,high,done
+F-TESTAUTO-006,front,component,TestAutoPageComponent,display_generic_error_without_detail,"en cas d'erreur réseau ou HTTP sans champ detail, on affiche un message générique 'Erreur de génération, veuillez réessayer plus tard.' sans naviguer ni conserver de QCM.",auto-qcm-web/src/app/pages/test-auto.component.spec.ts,unit,medium,done
+
+F-QCM-001,front,component,QcmPageComponent,score_computation,"submit() calcule correctement le score à partir des réponses sélectionnées.",auto-qcm-web/src/app/pages/qcm.component.spec.ts,unit,high,done
+F-QCM-002,front,component,QcmPageComponent,submit_without_qcm_noop,"submit() ne fait rien si qcm est null (score reste à 0).",auto-qcm-web/src/app/pages/qcm.component.spec.ts,unit,medium,done
+F-QCM-003,front,component,QcmPageComponent,save_without_user_sets_error,"save() sans userId met 'Veuillez vous connecter.' et n'appelle pas l'API.",auto-qcm-web/src/app/pages/qcm.component.spec.ts,unit,high,done
+F-QCM-004,front,component,QcmPageComponent,save_success_navigate_history,"save() avec userId et QCM soumis appelle ApiService.saveQcm et redirige vers /history.",auto-qcm-web/src/app/pages/qcm.component.spec.ts,unit,high,done
+F-QCM-005,front,component,QcmPageComponent,export_json_filename,"exportJson() génère un nom de fichier conforme au README.",auto-qcm-web/src/app/pages/qcm.component.spec.ts,unit,low,done
+
+F-HISTORY-001,front,component,HistoryPageComponent,no_user_sets_error,"ngOnInit() met un message d'erreur si auth.userId est null.",auto-qcm-web/src/app/pages/history.component.spec.ts,unit,high,done
+F-HISTORY-002,front,component,HistoryPageComponent,load_history_success,"ngOnInit() appelle ApiService.getHistory et remplit items.",auto-qcm-web/src/app/pages/history.component.spec.ts,unit,high,done
+F-HISTORY-003,front,component,HistoryPageComponent,load_history_error,"erreur de getHistory() affiche 'Erreur de chargement'.",auto-qcm-web/src/app/pages/history.component.spec.ts,unit,medium,done
+F-HISTORY-004,front,component,HistoryPageComponent,open_qcm_navigate,"open(id) charge le QCM, stocke dans QcmStoreService et navigue vers /qcm.",auto-qcm-web/src/app/pages/history.component.spec.ts,unit,medium,done
+F-HISTORY-005,front,component,HistoryPageComponent,remove_updates_list,"remove(id) supprime l'élément de la liste locale après succès API.",auto-qcm-web/src/app/pages/history.component.spec.ts,unit,medium,done
+
+F-PROFILE-001,front,component,ProfilePageComponent,usage_null_without_session,"usage$ émet null quand aucune session n'est présente.",auto-qcm-web/src/app/pages/profile.component.spec.ts,unit,medium,done
+F-PROFILE-002,front,component,ProfilePageComponent,usage_calls_api_with_session,"usage$ appelle ApiService.getUsageStats quand une session existe.",auto-qcm-web/src/app/pages/profile.component.spec.ts,unit,high,done
+
+F-NOTFOUND-001,front,component,NotFoundComponent,render_message,"la page 404 affiche le message/CTA attendu.",auto-qcm-web/src/app/pages/not-found.component.spec.ts,unit,low,done
+
+B-API-001,back,endpoint,GET /,root_status_ok,"GET / renvoie status=ok et le nom d'API attendu.",api/tests/test_api_basic.py,integration,high,done
+B-API-002,back,endpoint,POST /generate_qcm,generate_qcm_error_details,"/generate_qcm renvoie un code d'erreur HTTP approprié avec un champ detail explicite quand la génération échoue (service indisponible ou erreur interne).",api/tests/test_api_basic.py,integration,high,done
+B-API-003,back,endpoint,POST /save_qcm,save_qcm_in_memory,"/save_qcm enregistre un QCM dans le STORE en mémoire en mode DEV sans Supabase.",api/tests/test_api_basic.py,integration,high,done
+B-API-004,back,endpoint,GET /history/{user_id},history_returns_saved,"/history/{user_id} retourne la liste des QCM sauvegardés dans le STORE.",api/tests/test_api_basic.py,integration,high,done
+B-API-005,back,endpoint,GET /qcm/{id},get_qcm_from_store,"GET /qcm/{id} retourne le QCM du STORE ou 404 si absent.",api/tests/test_api_basic.py,integration,high,done
+B-API-006,back,endpoint,DELETE /qcm/{id},delete_qcm_from_store,"DELETE /qcm/{id} supprime l'entrée du STORE et renvoie status ok.",api/tests/test_api_basic.py,integration,high,done
+B-API-007,back,endpoint,GET /usage_stats,usage_stats_without_supabase,"/usage_stats retourne un rôle 'dev' et total=0 quand Supabase est inactif.",api/tests/test_api_usage_stats.py,integration,medium,done
+
+B-AUTH-001,back,util,_verify_and_get_user_id,valid_bearer_token,"_verify_and_get_user_id() extrait le user_id d'un JWT Bearer valide.",api/tests/test_auth_utils.py,unit,medium,done
+B-AUTH-002,back,util,_verify_and_get_user_id,invalid_token_dev_mode,"en DEV_MODE, un token invalide renvoie DEV_USER_ID.",api/tests/test_auth_utils.py,unit,medium,done
+B-AUTH-003,back,util,_verify_and_get_user_id,no_token_dev_mode,"en DEV_MODE sans Authorization, renvoie DEV_USER_ID.",api/tests/test_auth_utils.py,unit,medium,done
+B-AUTH-004,back,util,_verify_and_get_user_id,no_token_prod,"sans token et hors DEV_MODE, déclenche une HTTPException 401.",api/tests/test_auth_utils.py,unit,high,done
+
+B-UTIL-001,back,util,_extract_json,parse_object_in_markdown,"_extract_json() extrait un objet JSON encapsulé dans du markdown.",api/tests/test_utils.py,unit,medium,done
+B-UTIL-002,back,util,_extract_json,parse_array,"_extract_json() gère aussi un tableau JSON brut.",api/tests/test_utils.py,unit,medium,done
+B-UTIL-003,back,util,_generate_fallback,fallback_items_count,"_generate_fallback() retourne exactement count questions.",api/tests/test_utils.py,unit,low,done
+B-UTIL-004,back,util,_generate_fallback,fallback_skills_cycle,"_generate_fallback() alterne correctement les skills fournies.",api/tests/test_utils.py,unit,low,done
+
+B-QUOTA-001,back,endpoint,POST /generate_qcm,quota_forbidden_role,"si le rôle utilisateur a une limite atteinte, /generate_qcm renvoie 403.",api/tests/test_api_quota.py,integration,medium,done
+B-QUOTA-002,back,endpoint,POST /generate_qcm,unknown_role_forbidden,"si le rôle n'est pas connu, renvoie 403 avec message explicite.",api/tests/test_api_quota.py,integration,medium,done
+
+B-SUPA-001,back,endpoint,POST /save_qcm,save_qcm_supabase_success,"avec Supabase actif, /save_qcm insère un enregistrement valide dans qcm_tests.",api/tests/test_api_supabase.py,integration,low,done
+B-SUPA-002,back,endpoint,GET /history/{user_id},history_supabase_success,"avec Supabase actif, /history/{user_id} mappe correctement les champs SQL vers HistoryItem.",api/tests/test_api_supabase.py,integration,low,done

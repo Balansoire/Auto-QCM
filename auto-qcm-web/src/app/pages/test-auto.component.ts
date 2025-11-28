@@ -35,7 +35,14 @@ export class TestAutoPageComponent {
       },
       error: err => {
         this.loading = false;
-        this.error = 'Erreur de génération';
+        const backendDetail = err && err.error && typeof err.error.detail === 'string' ? err.error.detail : null;
+        if (backendDetail) {
+          this.error = backendDetail;
+        } else if (err && typeof (err as any).status !== 'undefined') {
+          this.error = 'Erreur de génération, veuillez réessayer plus tard.';
+        } else {
+          this.error = 'Erreur de génération';
+        }
         this.qcmStore.setCurrent(null);
         console.error(err);
       }
